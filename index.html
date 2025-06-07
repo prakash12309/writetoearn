@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story Reward Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .hidden { display: none; }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div id="loginPage" class="min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+      <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Upload your handwritten story (1000 words = ₹100)</h2>
+      <h1 class="text-2xl font-bold mb-4 text-center">Login</h1>
+      <input type="text" id="username" placeholder="Username" class="w-full mb-4 p-2 border rounded" />
+      <input type="password" id="password" placeholder="Password" class="w-full mb-4 p-2 border rounded" />
+      <button onclick="login()" class="bg-blue-500 text-white px-4 py-2 rounded w-full">Login</button>
+      <p id="loginError" class="text-red-500 mt-2 text-center hidden">Invalid credentials or too short.</p>
+    </div>
+  </div>  <div id="dashboard" class="hidden p-6">
+    <div class="flex justify-between items-center mb-6">
+      <div class="text-lg font-bold">Balance: ₹<span id="balance">0</span></div>
+      <div class="relative inline-block">
+        <button onclick="toggleMenu()" class="text-2xl font-bold">⋮</button>
+        <div id="menu" class="hidden absolute right-0 mt-2 w-32 bg-white border rounded shadow">
+          <button onclick="showBalance()" class="block w-full text-left px-4 py-2 hover:bg-gray-200">Balance</button>
+          <button onclick="showWithdraw()" class="block w-full text-left px-4 py-2 hover:bg-gray-200">Withdraw</button>
+        </div>
+      </div>
+    </div>
+    <button onclick="showHome()" class="mb-4 bg-green-500 text-white px-4 py-2 rounded">Home</button><div id="home" class="">
+  <h2 class="text-xl font-semibold mb-4">Upload your handwritten story PDF (1000+ words)</h2>
+  <input type="file" id="pdfUpload" accept="application/pdf" class="mb-4" />
+  <button onclick="uploadPDF()" class="bg-blue-500 text-white px-4 py-2 rounded">Submit</button>
+  <p id="uploadMsg" class="mt-4 text-green-600 hidden">PDF uploaded! ₹100 added to your balance.</p>
+</div>
+
+<div id="withdrawPage" class="hidden">
+  <h2 class="text-xl font-semibold mb-4">Withdraw</h2>
+  <select id="method" class="mb-4 p-2 border rounded w-full">
+    <option value="upi">UPI</option>
+    <option value="bank">Bank Transfer</option>
+    <option value="google">Google Redeem Code</option>
+  </select>
+  <input type="text" id="paymentDetails" placeholder="Enter payment info / email" class="w-full mb-4 p-2 border rounded" />
+  <input type="number" id="withdrawAmount" placeholder="Amount to withdraw" class="w-full mb-4 p-2 border rounded" />
+  <button onclick="withdraw()" class="bg-purple-600 text-white px-4 py-2 rounded w-full">Withdraw</button>
+  <p id="withdrawMsg" class="mt-4 text-blue-600 hidden">Check your account after 24 hours.</p>
+</div>
+
+  </div>  <script>
+    const storedUser = localStorage.getItem("username");
+    const storedPass = localStorage.getItem("password");
+    let balance = parseInt(localStorage.getItem("balance")) || 0;
+
+    if (storedUser && storedPass) {
+      document.getElementById("loginPage").classList.add("hidden");
+      document.getElementById("dashboard").classList.remove("hidden");
+      document.getElementById("balance").innerText = balance;
+    }
+
+    function login() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+
+      if (user.length >= 7 && pass.length >= 7 && /[0-9]/.test(pass) && /[^A-Za-z0-9]/.test(pass)) {
+        localStorage.setItem("username", user);
+        localStorage.setItem("password", pass);
+        localStorage.setItem("balance", balance);
+        document.getElementById("loginPage").classList.add("hidden");
+        document.getElementById("dashboard").classList.remove("hidden");
+        document.getElementById("balance").innerText = balance;
+      } else {
+        document.getElementById("loginError").classList.remove("hidden");
+      }
+    }
+
+    function toggleMenu() {
+      document.getElementById("menu").classList.toggle("hidden");
+    }
+
+    function showWithdraw() {
+      document.getElementById("home").classList.add("hidden");
+      document.getElementById("withdrawPage").classList.remove("hidden");
+      document.getElementById("menu").classList.add("hidden");
+    }
+
+    function showBalance() {
+      alert("Your current balance is ₹" + balance);
+    }
+
+    function showHome() {
+      document.getElementById("home").classList.remove("hidden");
+      document.getElementById("withdrawPage").classList.add("hidden");
+    }
+
+    function uploadPDF() {
+      const file = document.getElementById("pdfUpload").files[0];
+      if (!file || file.type !== "application/pdf") {
+        alert("Please upload a valid PDF file.");
+        return;
+      }
+      balance += 100;
+      localStorage.setItem("balance", balance);
+      document.getElementById("balance").innerText = balance;
+      document.getElementById("uploadMsg").classList.remove("hidden");
+      document.getElementById("pdfUpload").value = "";
+    }
+
+    function withdraw() {
+      const method = document.getElementById("method").value;
+      const info = document.getElementById("paymentDetails").value;
+      const amount = parseInt(document.getElementById("withdrawAmount").value);
+
+      if (!info || !amount || amount <= 0 || amount > balance) {
+        alert("Enter valid withdrawal details and amount.");
+        return;
+      }
+
+      balance -= amount;
+      localStorage.setItem("balance", balance);
+      document.getElementById("balance").innerText = balance;
+      document.getElementById("withdrawMsg").classList.remove("hidden");
+    }
+  </script></body>
+</html>
